@@ -21,6 +21,7 @@ public class ShapeTest {
 		shape1.draw();
 		shape2.draw();
 		shape3.draw();
+		System.out.println(shape3.getClass().getName());  //动态获取引用所指对象的类型
 	}
 
 	@Test
