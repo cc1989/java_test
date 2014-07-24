@@ -16,8 +16,15 @@ public class DistributedLock {
 	private String lockPath = "/lock";
 	private ZooKeeper zooKeeper ;
 
-	public DistributedLock(ZooKeeper zooKeeper){
-		this.zooKeeper = zooKeeper;
+	public DistributedLock(String url) throws IOException{
+		Watcher wh=new Watcher(){
+			public void process(org.apache.zookeeper.WatchedEvent event)
+			{
+				System.out.println(Thread.currentThread().getName() + " : " + event.toString());
+			}
+		};
+		zooKeeper = new ZooKeeper(url, 20000, wh);
+		lock = new WriteLock(zooKeeper, lockPath, null); 
 	}
 
 	/**
@@ -30,13 +37,13 @@ public class DistributedLock {
 	 * @return 获得锁是否成功
 	 */
 	public boolean lock(){
-		lock = new WriteLock(zooKeeper, lockPath, null);
+		
 		try {
 			while (true) {
 				if (lock.lock()) {
 					return true;
 				}
-
+				Thread.sleep(1000);
 			}
 		} catch (KeeperException e) {
 			e.printStackTrace();
@@ -63,32 +70,23 @@ public class DistributedLock {
 	public static void main(String args[]) throws FileNotFoundException{
 		Log4jConfigurer.initLogging("src/main/resources/log4j.properties", 10);
 		try {
-			Watcher wh=new Watcher(){
-				public void process(org.apache.zookeeper.WatchedEvent event)
-				{
-					System.out.println(event.toString());
-				}
-			};
-
-			ZooKeeper zooKeeper = new ZooKeeper("10.73.145.135:2181", 20000, wh);
-			final DistributedLock distributedLock = new DistributedLock(zooKeeper);
-			
-			
-			for(int i = 0; i < 100 ; i ++){
+					
+			for(int i = 0; i < 5 ; i ++){
 				Thread thread = new Thread(new Runnable(){
+					DistributedLock lock = new DistributedLock("10.73.145.135:2181");
 					public void run() {
-						if(distributedLock.lock()){
-							System.out.println("获得锁---------------");
+						if(lock.lock()){
+							System.out.println(Thread.currentThread().getName() + " : 获得锁---------------");
 						
 						}
 						try {
-							Thread.sleep(1000);
+							Thread.sleep(5000);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						distributedLock.unlock();
-						
+						lock.unlock();
+						System.out.println(Thread.currentThread().getName() + " : 释放锁---------------");
 					}
 					
 				});

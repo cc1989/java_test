@@ -204,9 +204,11 @@ public class WriteLock extends ProtocolSupport {
          */
         public boolean execute() throws KeeperException, InterruptedException {
             do {
-            	System.out.println("try lock");
+            	
+            	System.out.println(id + " ： " + Thread.currentThread().getName() + " : try lock");
                 if (id == null) {
                     long sessionId = zookeeper.getSessionId();
+                    System.out.println(Thread.currentThread().getName() + " : " + sessionId);
                     String prefix = "x-" + sessionId + "-";
                     // lets try look up the current ID if we failed 
                     // in the middle of creating the znode
@@ -268,7 +270,8 @@ public class WriteLock extends ProtocolSupport {
             return false;
         }
         ensurePathExists(dir);
-
+        System.out.println(Thread.currentThread().getName() + " : sleep");
+        Thread.sleep(1000);
         return (Boolean) retryOperation(zop);
     }
 

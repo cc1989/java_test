@@ -42,7 +42,7 @@ class ZNodeName implements Comparable<ZNodeName> {
             this.prefix = name.substring(0, idx);
             try {
                 this.sequence = Integer.parseInt(name.substring(idx + 1));
-                LOG.info(String.valueOf(sequence));
+                //LOG.info(String.valueOf(sequence));
                 // If an exception occurred we misdetected a sequence suffix,
                 // so return -1.
             } catch (NumberFormatException e) {
@@ -76,7 +76,8 @@ class ZNodeName implements Comparable<ZNodeName> {
     }
 
     public int compareTo(ZNodeName that) {
-        int answer = this.prefix.compareTo(that.prefix);
+    	//比前缀会有问题：x-92094492238741945-0000000645, x-92094492238741943-0000000646
+        /*int answer = this.prefix.compareTo(that.prefix);
         if (answer == 0) {
             int s1 = this.sequence;
             int s2 = that.sequence;
@@ -84,8 +85,14 @@ class ZNodeName implements Comparable<ZNodeName> {
                 return this.name.compareTo(that.name);
             }
             answer = s1 == -1 ? 1 : s2 == -1 ? -1 : s1 - s2;
-        }
-        return answer;
+        }*/
+        
+        if (this.sequence > that.sequence)
+        	return 1;
+        else if (this.sequence < that.sequence)
+        	return -1;
+        else
+        	return 0;
     }
 
     /**
